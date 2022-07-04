@@ -1,0 +1,22 @@
+RUNS_IN_DOCKER: -1
+POSTGRES_URL: postgres://docker:docker@localhost:45432/postgres
+POSTGRES_HOST: postgres://docker:docker@localhost:45432/
+POSTGRES_DB_URL: postgres://docker:docker@localhost:45432/understanding_valhalla
+
+POSTGRES_LOCALHOST: postgres://docker:docker@localhost:45432/understanding_valhalla
+DATA_STORAGE: ${HOME}/understanding-valhalla/data-storage/data
+ARCHIVE_STORAGE: ${HOME}/understanding-valhalla/data-storage/archive
+QUERY_RESULTS: ${HOME}/understanding-valhalla/data-storage/query_results
+
+JOB_INTERVAL: 300
+MAX_LINES: 97
+
+
+
+ZIP_INIT_DATA: archive.zip
+DIR_INIT_DATA: Infra/archive
+DATAFILES:
+  
+DATATYPES:
+  
+

@@ -1,0 +1,128 @@
+version: '3.7'
+
+networks:
+  valhalla-data:
+    name: valhalla-data
+    driver: bridge
+
+services:
+
+#####################################################################
+#          data services                                    #
+#####################################################################
+
+  valhalla-vikings-scraping-service:
+    hostname: valhalla-vikings-scraping-service
+    container_name: valhalla-vikings-scraping-service
+    image: "valhalla-vikings-scraping-service:latest"        
+    environment:
+      - RUNS_IN_DOCKER=-1
+      - POSTGRES_DB_URL=postgres://docker:docker@localhost:5333/understanding_valhalla
+      - DATA_STORAGE=/root/data-storage/data
+      - ARCHIVE_STORAGE=/root/data-storage/archive
+      - QUERY_RESULTS=/root/data-storage/query_results
+      - HOME_DIR=${HOME}
+      - JOB_INTERVAL=300
+    volumes:
+      - ${HOME}/understanding-valhalla/data-storage/vikings/data:/root/data-storage/data
+      - ${HOME}/understanding-valhalla/data-storage/vikings/archive:/root/data-storage/archive
+      - ${HOME}/understanding-valhalla/data-storage/vikings/query_results:/root/data-storage/query_results
+      - /etc/rc.local:/host/rc.local
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - "postgresql"
+      - "consul"
+    privileged: true
+    restart: always
+    ports:
+      - "21003:21003"
+    networks:
+      - valhalla-data
+  
+  
+  
+  valhalla-norsemen-scraping-service:
+    hostname: valhalla-norsemen-scraping-service
+    container_name: valhalla-norsemen-scraping-service
+    image: "valhalla-norsemen-scraping-service:latest"        
+    environment:
+      - RUNS_IN_DOCKER=-1
+      - POSTGRES_DB_URL=postgres://docker:docker@localhost:5333/understanding_valhalla
+      - DATA_STORAGE=/root/data-storage/data
+      - ARCHIVE_STORAGE=/root/data-storage/archive
+      - QUERY_RESULTS=/root/data-storage/query_results
+      - HOME_DIR=${HOME}
+      - JOB_INTERVAL=300
+    volumes:
+      - ${HOME}/understanding-valhalla/data-storage/norsemen/data:/root/data-storage/data
+      - ${HOME}/understanding-valhalla/data-storage/norsemen/archive:/root/data-storage/archive
+      - ${HOME}/understanding-valhalla/data-storage/norsemen/query_results:/root/data-storage/query_results
+      - /etc/rc.local:/host/rc.local
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - "postgresql"
+      - "consul"
+    privileged: true
+    restart: always
+    ports:
+      - "21003:21003"
+    networks:
+      - valhalla-data
+  
+  
+  valhalla-nfl-team-scraping-service:
+    hostname: valhalla-nfl-team-scraping-service
+    container_name: valhalla-nfl-team-scraping-service
+    image: "valhalla-nfl-team-scraping-service:latest"        
+    environment:
+      - RUNS_IN_DOCKER=-1
+      - POSTGRES_DB_URL=postgres://docker:docker@localhost:5333/understanding_valhalla
+      - DATA_STORAGE=/root/data-storage/data
+      - ARCHIVE_STORAGE=/root/data-storage/archive
+      - QUERY_RESULTS=/root/data-storage/query_results
+      - HOME_DIR=${HOME}
+      - JOB_INTERVAL=300
+    volumes:
+      - ${HOME}/understanding-valhalla/data-storage/nfl-team/data:/root/data-storage/data
+      - ${HOME}/understanding-valhalla/data-storage/nfl-team/archive:/root/data-storage/archive
+      - ${HOME}/understanding-valhalla/data-storage/nfl-team/query_results:/root/data-storage/query_results
+      - /etc/rc.local:/host/rc.local
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - "postgresql"
+      - "consul"
+    privileged: true
+    restart: always
+    ports:
+      - "21003:21003"
+    networks:
+      - valhalla-data
+    
+ 
+ webapp-service:
+    hostname: webapp-service
+    container_name: webapp-service
+    image: "webapp-service:latest"        
+    environment:
+      - RUNS_IN_DOCKER=-1
+      - POSTGRES_DB_URL=postgres://docker:docker@localhost:5333/understanding_valhalla
+      - DATA_STORAGE=/root/data-storage/data
+      - ARCHIVE_STORAGE=/root/data-storage/archive
+      - QUERY_RESULTS=/root/data-storage/query_results
+      - HOME_DIR=${HOME}
+      - JOB_INTERVAL=300
+    volumes:
+      - ${HOME}/understanding-valhalla/data-storage/webapp/data:/root/data-storage/data
+      - ${HOME}/understanding-valhalla/data-storage/webapp/archive:/root/data-storage/archive
+      - ${HOME}/understanding-valhalla/data-storage/webapp/query_results:/root/data-storage/query_results
+      - /etc/rc.local:/host/rc.local
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - "postgresql"
+      - "consul"
+    privileged: true
+    restart: always
+    ports:
+      - "21003:21003"
+    networks:
+      - valhalla-data

@@ -1,0 +1,56 @@
+version: '3.7'
+
+networks:
+  valhalla-data:
+    name: valhalla-data
+    driver: bridge
+
+services:
+
+#####################################################################
+#          Queues, Brokers, Logging, DB, Infra services, etc        #
+#####################################################################
+  postgresql:
+    container_name: postgresql
+    image: "postgres:12.4"
+    hostname: "postgresql"
+    volumes:
+      - ${HOME}/understanding-valhalla/data-storage/postgresql/data:/var/lib/postgresql/data
+      - ${HOME}/understanding-valhalla/data-storage/data:/root/data-storage/data
+      - ${HOME}/understanding-valhalla/data-storage/archive:/root/data-storage/archive
+      - ${HOME}/understanding-valhalla/data-storage/query_results:/root/data-storage/query_results
+    ports:
+      - "127.0.0.1:45432:5432"
+    environment:
+      - POSTGRES_HOST=localhost
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DBPARAMS="--lc-collate=C --template=template0 --lc-ctype=C"
+    restart: unless-stopped
+    networks:
+      - valhalla-data
+      
+  consul:
+    container_name: consul
+    image: "consul:latest"
+    hostname: "consul"
+    volumes:
+      - ${HOME}/understanding-valhalla/data-storage/consul/data:/consul/data
+    ports:
+      - 48501:8500
+      - 48601:8600
+    command: agent -server -ui -dev -bind 0.0.0.0 -client 0.0.0.0 -bootstrap -bootstrap-expect 1
+    restart: unless-stopped
+    networks:
+      - valhalla-data
+  
+  
+  adminer:
+    container_name: adminer
+    hostname: "adminer"
+    image: adminer:latest
+    restart: always
+    ports:
+      - 48080:8080
+    networks:
+      - valhalla-data

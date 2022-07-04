@@ -1,0 +1,51 @@
+version: '3.7'
+
+networks:
+  valhalla-data:
+    name: valhalla-data
+    driver: bridge
+
+services:
+
+#####################################################################
+#          Data services                                    #
+#####################################################################
+
+  valhalla-vikings-scraping-service:
+    build:
+      context: Valhalla-Vikings-Scraping-Service/.
+      dockerfile: Dockerfile
+      args:
+        BUILD_VERSION: ${BUILD_VERSION}
+    logging:
+      driver: "json-file"
+      
+      
+  valhalla-norsemen-scraping-service:
+    build:
+      context: Valhalla-Norsemen-Scraping-Service/.
+      dockerfile: Dockerfile
+      args:
+        BUILD_VERSION: ${BUILD_VERSION}
+    logging:
+      driver: "json-file"
+  
+  valhalla-nfl-team-scraping-service:
+    build:
+      context: Valhalla-NFL-Team-Scraping-Service/.
+      dockerfile: Dockerfile
+      args:
+        BUILD_VERSION: ${BUILD_VERSION}
+    logging:
+      driver: "json-file"
+  
+  webapp-service:
+    build:
+      context: WebApp-Service/.
+      dockerfile: Dockerfile
+      args:
+        BUILD_VERSION: ${BUILD_VERSION}
+    logging:
+      driver: "json-file"
+ 
+
