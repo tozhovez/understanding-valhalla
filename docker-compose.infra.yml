@@ -44,7 +44,17 @@ services:
     networks:
       - valhalla-data
   
-  
+  redis:
+    container_name: redis
+    image: "redis:alpine"
+    hostname: "redis"
+    ports:
+      - "46379:6379"
+    restart: unless-stopped
+    networks:
+      - valhalla-data
+      
+
   adminer:
     container_name: adminer
     hostname: "adminer"

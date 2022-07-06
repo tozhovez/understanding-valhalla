@@ -1,14 +1,17 @@
 import asyncio
+import requests
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 from urllib.parse import urlparse, urlunparse, urljoin, urldefrag
 from typing import Set, Union, List, MutableMapping, Optional
 from task import Task
 import aiohttp
-
+import pathlib
 from yarl import URL
+from core.files_lib import file_writer, async_file_writer
 MAX_DEPTH = 1000
 PARSED_URLS = set()
+PARSED_IMAGES = set()
 
 #<script data-module-id="shared-schema__series" type="application/ld+json">
 #dm = soup.find_all('script', attrs={"data-module-id": "shared-schema__series"})
@@ -29,10 +32,13 @@ class FetchTask(Task):
         if self.depth + 1 > MAX_DEPTH:
             return []
         soup = BeautifulSoup(data, 'lxml')
-        #print(soup)
+        folder = pathlib.Path(__file__).parent / "htmls" /f"{'_'.join(self.url.parts[1:]).strip('/')}.html"
+        
+        file_writer(folder, str([*soup]))
         res = []
         
         
+ 
         for link in soup.find_all(href=True):
             new_url = URL(link['href'])
             
@@ -61,13 +67,19 @@ class FetchTask(Task):
     async def perform(self, pool):
         async with aiohttp.ClientSession() as session:
             async with session.get(self.url) as resp:
-                print(self.url, resp.status)
+                #print(self.url, resp.status)
                 data = await resp.text()
-                print(data)
+                #print(data)
                 res: List[FetchTask] = await asyncio.get_running_loop().run_in_executor(
                     None, self.parser, data
                 )
                 for task in res:
                     await pool.put(task)
+    
+    
+    async def load_img(self, img):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(img) as resp:
+                return await resp
 
 

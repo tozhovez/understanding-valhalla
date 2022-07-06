@@ -1,0 +1,38 @@
+{
+    "global":{
+        "RUNS_IN_DOCKER": -1, 
+        "CONSUL_HOST": "http://localhost:48500",
+        "POSTGRES_URL": "postgres://docker:docker@localhost:45432/postgres",
+        "POSTGRES_HOST": "postgres://docker:docker@localhost:45432",
+        "DB_NAME": "understanding_valhalla",
+        "DATA_STORAGE": "${HOME}/understanding-valhalla/data-storage/data",
+        "ARCHIVE_STORAGE": "${HOME}/understanding-valhalla/data-storage/archive",
+        "HOST_NAME": "crawler"
+        
+    },
+    "local": {
+        "RUNS_IN_DOCKER": 1,
+        "CONSUL_HOST": "http://consul:8500",
+        "POSTGRES_URL": "postgres://docker:docker@postgresql:5432/postgres",
+        "POSTGRES_HOST": "postgres://docker:docker@postgresql:5432",
+        "DB_NAME": "understanding_valhalla",
+        "DATA_STORAGE": "${HOME}/understanding-valhalla/data-storage/data",
+        "ARCHIVE_STORAGE": "${HOME}/understanding-valhalla/data-storage/archive",
+        "HOST_NAME": "crawler"
+        
+        },
+    "valhalla-vikings-scraping-service": {
+        "BASE_URL": "https://www.history.com/shows/vikings"
+        },
+    "valhalla-norsemen-scraping-service": {
+        "BASE_URL": "https://www.history.com/shows/vikings"
+    },
+    "valhalla-nfl-team-scraping-service": {
+        "BASE_URL": "https://www.history.com/shows/vikings" 
+        },
+    "webapp-service": {
+        "BASE_URL": "https://www.history.com/shows/vikings"
+        
+    }
+    
+}

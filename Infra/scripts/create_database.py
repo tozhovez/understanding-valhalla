@@ -3,34 +3,41 @@ import subprocess
 from PyInquirer import prompt
 from postgres_client import PostgresClient
 
-configs_dir = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', 'postgres_schemas'))
-archive_dir = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', 'archive'))
-pg_client = PostgresClient(dsn=os.getenv(
-    'POSTGRES_URL',
-    "postgres://docker:docker@localhost:45432/postgres"
-    ))
+import yaml
+import pathlib
+from PyInquirer import prompt
 
-questions = [{
-    'type': 'list',
-    'name': 'file',
-    'message': 'Choose schema file',
-    'choices': [*os.listdir(configs_dir)],
-}]
 
-answers = prompt(questions)
+SERVICE_CONF = pathlib.Path(__file__).parent.parent / "configs" /os.getenv(
+    "CONFIGS_FILE", "config.yml"
+)
 
-if not answers:
-    sys.exit(0)
 
-db_name = answers['file'].split('.')[0]
+def load_config_from_yaml(filename):
+    """load configuration from yaml file"""
+    with open(filename, "r", encoding="utf-8") as fd_reader:
+        return yaml.full_load(fd_reader)
+    Path.iterdir()
 
-if pg_client.create_db(db_name, 'docker') is True:
-    pg_url = str(f"postgres://docker:docker@localhost:45432/{db_name}")
-
-    with open(os.path.join(configs_dir, answers['file']), 'r') as f:
-        query = f.read()
-        subprocess.run(["psql", pg_url, "-X", "--quiet", "-c", query])
+def main():
+    configs = load_config_from_yaml(SERVICE_CONF)
+    pg_client = PostgresClient(dsn=configs["POSTGRES_URL"])
+    filename = pathlib.Path(__file__).parent.parent / configs["POSTGRES_SCHEMAS"]
     
-        #subprocess.run(["psql", pg_url, "-X", "--quiet", "-c", line])
+    if pg_client.create_db(
+        configs["POSTGRES_DBNAME"], configs["POSTGRES_USERNAME"]
+        ) is True:
+        try:
+            pg_url = str(f'{configs["POSTGRES_DBURL"]}')
+            query = filename.read_text()
+            subprocess.run(["psql", pg_url, "-X", "--quiet", "-c", query])
+        except Exception:
+            pass
+        
+        
+            #subprocess.run(["psql", pg_url, "-X", "--quiet", "-c", line])
+    
+
+
+if __name__ == '__main__':
+    main()

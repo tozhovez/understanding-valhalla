@@ -10,5 +10,5 @@ ENV PATH=/root/.local/bin:$PATH
 
 COPY . /app
 WORKDIR /app
-
+EXPOSE 2004
 CMD ["python", "./main.py"]

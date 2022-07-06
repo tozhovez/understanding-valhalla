@@ -16,8 +16,8 @@ services:
     container_name: valhalla-vikings-scraping-service
     image: "valhalla-vikings-scraping-service:latest"        
     environment:
-      - RUNS_IN_DOCKER=-1
-      - POSTGRES_DB_URL=postgres://docker:docker@localhost:5333/understanding_valhalla
+      - RUNS_IN_DOCKER=1
+      - POSTGRES_DB_URL=postgres://docker:docker@postgresql:5432/understanding_valhalla
       - DATA_STORAGE=/root/data-storage/data
       - ARCHIVE_STORAGE=/root/data-storage/archive
       - QUERY_RESULTS=/root/data-storage/query_results
@@ -32,10 +32,11 @@ services:
     depends_on:
       - "postgresql"
       - "consul"
+      - "redis"
     privileged: true
     restart: always
     ports:
-      - "21003:21003"
+      - "42003:2003"
     networks:
       - valhalla-data
   
@@ -46,8 +47,8 @@ services:
     container_name: valhalla-norsemen-scraping-service
     image: "valhalla-norsemen-scraping-service:latest"        
     environment:
-      - RUNS_IN_DOCKER=-1
-      - POSTGRES_DB_URL=postgres://docker:docker@localhost:5333/understanding_valhalla
+      - RUNS_IN_DOCKER=1
+      - POSTGRES_DB_URL=postgres://docker:docker@postgresql:5432/understanding_valhalla
       - DATA_STORAGE=/root/data-storage/data
       - ARCHIVE_STORAGE=/root/data-storage/archive
       - QUERY_RESULTS=/root/data-storage/query_results
@@ -62,10 +63,11 @@ services:
     depends_on:
       - "postgresql"
       - "consul"
+      - "redis"
     privileged: true
     restart: always
     ports:
-      - "21003:21003"
+      - "42004:2004"
     networks:
       - valhalla-data
   
@@ -75,8 +77,8 @@ services:
     container_name: valhalla-nfl-team-scraping-service
     image: "valhalla-nfl-team-scraping-service:latest"        
     environment:
-      - RUNS_IN_DOCKER=-1
-      - POSTGRES_DB_URL=postgres://docker:docker@localhost:5333/understanding_valhalla
+      - RUNS_IN_DOCKER=1
+      - POSTGRES_DB_URL=postgres://docker:docker@postgresql:5432/understanding_valhalla
       - DATA_STORAGE=/root/data-storage/data
       - ARCHIVE_STORAGE=/root/data-storage/archive
       - QUERY_RESULTS=/root/data-storage/query_results
@@ -91,10 +93,11 @@ services:
     depends_on:
       - "postgresql"
       - "consul"
+      - "redis"
     privileged: true
     restart: always
     ports:
-      - "21003:21003"
+      - "42005:2005"
     networks:
       - valhalla-data
     
@@ -104,8 +107,8 @@ services:
     container_name: webapp-service
     image: "webapp-service:latest"        
     environment:
-      - RUNS_IN_DOCKER=-1
-      - POSTGRES_DB_URL=postgres://docker:docker@localhost:5333/understanding_valhalla
+      - RUNS_IN_DOCKER=1
+      - POSTGRES_DB_URL=postgres://docker:docker@postgresql:5432/understanding_valhalla
       - DATA_STORAGE=/root/data-storage/data
       - ARCHIVE_STORAGE=/root/data-storage/archive
       - QUERY_RESULTS=/root/data-storage/query_results
@@ -120,9 +123,10 @@ services:
     depends_on:
       - "postgresql"
       - "consul"
+      - "redis"
     privileged: true
     restart: always
     ports:
-      - "21003:21003"
+      - "42006:2006"
     networks:
       - valhalla-data

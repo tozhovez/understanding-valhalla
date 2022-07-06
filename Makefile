@@ -8,127 +8,102 @@
 PROJECT_NAME=understanding-valhalla
 PWD := $(shell pwd)
 LAST_COMMIT_SHA := $(shell git log -1 --pretty=format:%h -- .)
+VERSION := $(shell cat .version)
 EXPORT_VERSION := $(VERSION)
 PACKAGE_NAME := $(shell basename "$(PWD)")
 PYTHON := $(shell which python)
 PIP := $(shell which pip)
 PYV := $(shell $(PYTHON) -c "import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)")
-AWS_CLI := $(shell which aws)
-PROJECT_STORAGE := ${HOME}/${PROJECT_NAME}/data-storage
-PACKAGE_STORAGE := ${HOME}/${PROJECT_NAME}/data-storage/${PACKAGE_NAME}
+PROJECT_STORAGE := ${HOME}/${PACKAGE_NAME}/data-storage
+
 BUILD_VERSION := latest
-ENV_CONFIGS := $(shell cat configs)
-MODULE_NAME := valhalla-data
-PACKAGE := valhalla-data
-PACKAGE_PREFIX := valhalla-data
-REQ_FILE := requirements.txt
+REQ_FILE_DEV := requirements-dev.txt
 REQ_FILE_TOOLS := requirements-tools.txt
 
 
 SHELL:= /bin/bash
 dockerfile=Dockerfile
 
-module_name = $(MODULE_NAME)
-#EXPORT_VERSION = $(eval VERSION=$(shell cat .version))
-
-
-.DEFAULT_GOAL: help envs
+.DEFAULT_GOAL:  help
 
 help: ## Show this help
-	@printf "\n\033[33m%s:\033[1m\n" 'Choose available CLI commands run "$(PROJECT_NAME)"'
-	@echo "======================================================"
+	@printf "\n\033[33m%s:\033[1m\n" 'Choose available commands run in "$(PROJECT_NAME)"'
+	@echo "===================================================================="
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[32m%-14s		\033[35;1m-- %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 	@printf "\033[33m%s\033[1m\n"
-	@echo "======================================================"
+	@echo "===================================================================="
 
 
-envs: ## envs - display envs
-	@echo "======================================================"
-	@echo  "STORAGE: $(STORAGE)"
-	@echo  "MODULE_NAME: $(MODULE_NAME)"
-	@echo  "PACKAGE: $(PACKAGE)"
-	@echo  "PACKAGE_PREFIX: $(PACKAGE_PREFIX)"
-	@echo  "REQ_FILE: $(REQ_FILE)"
-	@echo  "$(REQ_FILE_TOOLS)"
-	@echo  "PYV3: $(PYV3)"
+envs: help ## envs - display envs
+	@echo "===================================================================="
 	@echo  "EXPORT_VERSION: $(EXPORT_VERSION)"
-	@echo  "package $(PACKAGE)"
+	@echo  "LAST_COMMIT_SHA $(LAST_COMMIT_SHA)"
+	@echo  "REQ_FILE_DEV: $(REQ_FILE_DEV)"
+	@echo  "REQ_FILE_TOOLS: $(REQ_FILE_TOOLS)"
+	@echo  "PYV: $(PYV)"
+	@echo  "VERSION: $(VERSION)"
 	@echo  "shell $(SHELL)"
-	@echo  "python $(PYTHON3)"
 	@echo  "pwd $(PWD)"
 	@echo "PROJECT_NAME $(PROJECT_NAME)"
-	@echo "LAST_COMMIT_SHA $(LAST_COMMIT_SHA)"
-	@echo "EXPORT_VERSION $(EXPORT_VERSION)" 
 	@echo "PACKAGE_NAME $(PACKAGE_NAME)"
 	@echo "PYTHON $(PYTHON)"
 	@echo "PIP $(PIP)"
-	@echo "AWS_CLI $(AWS_CLI)"
-	@echo "VERSION $(VERSION)"
 	@echo "PROJECT_STORAGE $(PROJECT_STORAGE)"
-	@echo "PACKAGE_STORAGE $(PACKAGE_STORAGE)"
-	@echo "ENV_CONFIGS $(ENV_CONFIGS)"
-	@echo "======================================================"
+	@echo "===================================================================="
  
 
 
 install-requirements: clean ## Install requirements
-	@echo "======================================================"
-	@echo "install-requirements $(PYV3) $(PACKAGE)"
-	@echo "======================================================"
+	@echo "===================================================================="
+	@echo "install- $(REQ_FILE_DEV) requirements $(PYV) $(PACKAGE)"
+	@echo "===================================================================="
 	$(PIP) install --upgrade pip
-	$(PIP) install -r $(REQ_FILE)
-	@echo "======================================================"
+	$(PIP) install -r $(REQ_FILE_DEV)
+	@echo "===================================================================="
 
 
-tools-requirements: $(REQ_FILE_TOOLS)
-	@echo "======================================================"
-	@echo "tools-requirements $(PYV3)"
-	@echo "======================================================"
-	$(PIP) install --upgrade -r $(REQ_FILE_TOOLS)
+tools-requirements: help  ## Install tools requirements
+	@echo "===================================================================="
+	@echo "install $(REQ_FILE_TOOLS) for$(PYV) $(PACKAGE_NAME)"
+	@echo "===================================================================="
+	@$(PIP) install --upgrade pip
+	@$(PIP) install --upgrade -r $(REQ_FILE_TOOLS)
+	@echo "===================================================================="
 
-run-infra: ## Run-infra (pull and run consul, postgres dockers)
+
+run-infra: ## Run-infra (pull and run consul, redis, adminer, postgres dockers)
 	@docker-compose -f docker-compose.infra.yml up -d> /dev/null
 
-stop-infra: ## Stop-infra (postgres dockers)
+
+
+stop-infra: ## Stop-infra (consul, redis, adminer, postgres dockers)
 	@docker-compose -f docker-compose.infra.yml down>/dev/null
 
-create-database: ## install-requirements run-infra ## Create postgres database and import schema
+
+
+create-database: ## Create postgres database and import schema
 	@$(PYTHON) ./Infra/scripts/create_database.py
 
 
-load-data: ## Load data
-	@$(PYTHON) ./LoadData/main.py
+
+set-configs: ## set configs
+	@echo "===================================================================="
+	@chmod +x -R ./Infra
+	@$(PYTHON) ./Infra/scripts/set_consul_configs.py
 
 
-update-data: ## Update_data
-	@$(PYTHON) ./UpdaterService/main.py
 
+run-services:
+	@docker-compose -f docker-compose.dev.yml -f docker-compose.debug.yml up -d --build>/dev/null
 
-stop-services: ##-f docker-compose.dev.yml -f docker-compose.debug.yml
-	@docker-compose -f docker-compose.infra.yml  down>/dev/null
+stop-services:
+	@docker-compose -f docker-compose.dev.yml -f docker-compose.debug.yml down>/dev/null
 
-#run-services:
-#	@docker-compose -f docker-compose.dev.yml -f docker-compose.debug.yml up -d --build>/dev/null
-
-#stop-services:
-#	@docker-compose -f docker-compose.dev.yml -f docker-compose.debug.yml down>/dev/null
-
-query: ## Script called "query.sh"
-	@echo "======================================================"
-	@chmod +x ./Query/query.sh
-	@$(SHELL) ./Query/query.sh $(STORAGE)/query_results
-
-
-docker-run:
-	@echo "======================================================"
-	@echo "running $(MODULE_NAME)"
-	@echo "======================================================"
-	docker-compose up --build
 
 flake8:
-	@echo "======================================================"
+	@echo "===================================================================="
 	@echo flake8 $(PACKAGE)
-	@echo "======================================================"
+	@echo "===================================================================="
 	flake8 --ignore=F401,E265,E129
 
 
@@ -137,9 +112,9 @@ flake8:
 clean: clean-pyc clean-build clean-test clean-docs
 	
 clean-pyc: ## clean-pyc - remove Python file artifacts
-	@echo "======================================================"
+	@echo "===================================================================="
 	@echo "clean-pyc - remove Python file artifacts in $(PACKAGE_NAME)"
-	@echo "======================================================"
+	@echo "===================================================================="
 	rm -rf __pycache__ venv "*.pyc"
 	find ./* -maxdepth 0 -name "*.pyc" -type f -delete
 	find . -name '*.pyc' -exec rm -f {} +
@@ -148,30 +123,30 @@ clean-pyc: ## clean-pyc - remove Python file artifacts
 	find . -name '__pycache__' -exec rm -fr {} +
 
 clean-build: ## clean-build - remove build artifacts
-	@echo "======================================================"
+	@echo "===================================================================="
 	@echo "clean-build - remove build artifacts in $(PACKAGE_NAME)"
-	@echo "======================================================"
+	@echo "===================================================================="
 	rm -fr build/
 	rm -fr dist/
 	rm -fr **.egg-info/
 	rm -fr .eggs/
 
 clean-test: ## clean-test - remove test artifacts
-	@echo "======================================================"
+	@echo "===================================================================="
 	@echo "clean-test - remove test artifacts in $(PACKAGE_NAME)"
-	@echo "======================================================"
+	@echo "===================================================================="
 	rm -rf .tox/
 
 clean-docs: ## clean-docs - remove documentation artifacts
-	@echo "======================================================"
+	@echo "===================================================================="
 	@echo "clean-docs - remove documentation artifacts"
-	@echo "======================================================"
+	@echo "===================================================================="
 	rm -rf docs/_build
 
 
 
 list: ## Makefile target list
-	@echo "======================================================"
+	@echo "===================================================================="
 	@echo Makefile target list
-	@echo "======================================================"
+	@echo "===================================================================="
 	@cat Makefile | grep "^[a-z]" | awk '{print $$1}' | sed "s/://g" | sort

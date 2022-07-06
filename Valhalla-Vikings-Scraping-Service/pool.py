@@ -2,6 +2,10 @@ import asyncio
 from dataclasses import dataclass
 from typing import Optional
 from task import Task
+from logging import Logger
+from datetime import datetime
+from injector import singleton, inject
+@singleton
 class Pool:
     """  Pool the entity controls the number of requests per unit of time
     max_rate:  maximum number of requests
@@ -10,10 +14,13 @@ class Pool:
     scheduler: wake up every interval
                and set the number of tasks equal to max_rate
     """
+    @inject
     def __init__(self,
+                 #logger: Logger,
                  max_rate: int,
                  interval: int = 10,
                  concurrent_level: Optional[int] = None):
+        #self.logger = logger
         self.max_rate = max_rate
         self.interval = interval
         self.concurrent_level = concurrent_level
@@ -47,6 +54,7 @@ class Pool:
     def start(self):
         self.is_running = True
         self._scheduler_task = asyncio.create_task(self._scheduler())
+        #self.logger.info("service has started")
     
     
     async def put(self, task: Task):
@@ -62,14 +70,10 @@ class Pool:
         self._scheduler_task.cancel()
         if self._cuncurrent_workers != 0:
             await self._stop_event.wait()
+        #self.logger.info('Job done')
     
-    async def stop(self):
-        self.is_running = False
-        self._scheduler_task.cancel()
+    # async def stop(self):
+    #     self.is_running = False
+    #     self._scheduler_task.cancel()
         
-    # async def _scheduler(self):
-    #     while self.is_running:
-    #         for _ in range(self.max_rate):
-    #             task = await self._queue.get()
-    #             asyncio.create_task(task.perform)
-    #         await asyncio.sleep(self.interval)
+   

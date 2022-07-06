@@ -1,0 +1,4 @@
+PyInquirer==1.0.3
+tabulate==0.8.10
+python-consul==1.1.0
+tenacity==8.0.1
