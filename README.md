@@ -1,6 +1,48 @@
 # understanding-valhalla
 Scraping, Store data, Web App, Git repository
 
+## Before to run:
+==================
+    Linux Ubuntu 22.04
+    python 3.9
+    docker and docker-compose
+    pyenv 
+## Run:
+==================
+```
+$ git clone https://github.com/tozhovez/understanding-valhalla.git
+
+$ cd understanding-valhalla
+
+$ make install-requirements
+
+$ make tools-requirements
+
+$ make run-infra
+
+$ make create-database
+
+$ make set-configs
+```
+~Choose config file  dev-scraper.json~
+
+<img src="docs/consul.png" width="300"/>
+
+```
+$ make run-services
+```
+
+### Runing consul, Adminer:
+=============
+```
+http://localhost:48501/ui/dc1/kv
+
+http://localhost:48080/
+user: docker
+pass: docker
+```
+<img src="docs/adminer.png" width="300"/>
+
 
 Crawlers
 =============
